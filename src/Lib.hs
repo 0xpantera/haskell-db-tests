@@ -64,4 +64,45 @@ printCheckedout = printToolQuery $
                             ,"(select tool_id from checkedout);"]
 
 
-                    
+selectTool :: Connection -> Int -> IO (Maybe Tool)
+selectTool conn toolId = do
+  resp <- query conn
+          "SELECT * FROM tools WHERE id = (?)"
+          (Only toolId) :: IO [Tool]
+  return $ firstOrNothing resp
+
+
+firstOrNothing :: [a] -> Maybe a
+firstOrNothing [] = Nothing
+firstOrNothing (x:_) = Just x
+
+
+updateTool :: Tool -> Day -> Tool
+updateTool tool date = tool
+  { lastReturned = date
+  , timesBorrowed = 1 + timesBorrowed tool
+  }
+
+
+updateOrWarn :: Maybe Tool -> IO ()
+updateOrWarn Nothing = print "id not found"
+updateOrWarn (Just tool) = withConn "tools.db" $
+                            \conn -> do
+                              let q = mconcat ["UPDATE TOOLS SET "
+                                              ,"lastReturned = ?, "
+                                              ,"timesBorrowed = ? "
+                                              ,"WHERE ID = ?;"]
+                              execute conn q (lastReturned tool
+                                             , timesBorrowed tool
+                                             , toolId tool)
+                              print "tool updated"
+
+
+updateToolTable :: Int -> IO ()
+updateToolTable toolId = withConn "tools.db" $
+                         \conn -> do
+                           tool <- selectTool conn toolId
+                           currentDay <- utctDay <$> getCurrentTime
+                           let updatedTool = updateTool <$> tool
+                                                        <*> pure currentDay
+                           updateOrWarn updatedTool
