@@ -2,6 +2,7 @@ module Lib
     ( addUser
     ) where
 
+import Lib.Types
 import Control.Applicative
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow
@@ -32,3 +33,35 @@ checkout userId toolId = withConn "tools.db" $
 
 
 
+printUsers :: IO ()
+printUsers = withConn "tools.db" $
+              \conn -> do
+                resp <- query_ conn "SELECT * FROM users;" :: IO [User]
+                mapM_ print resp
+
+
+printToolQuery :: Query -> IO ()
+printToolQuery q = withConn  "tools.db" $
+                     \conn -> do
+                       resp <- query_ conn q :: IO [Tool]
+                       mapM_ print resp
+
+
+printTools :: IO ()
+printTools = printToolQuery "SELECT * FROM tools;"
+
+
+printAvailable :: IO ()
+printAvailable = printToolQuery $ mconcat ["select * from tools "
+                                           ,"where id not in "
+                                           ,"(select tool_id from checkedout);"]
+
+
+printCheckedout :: IO ()
+printCheckedout = printToolQuery $
+                    mconcat ["select * from tools "
+                            ,"where id in "
+                            ,"(select tool_id from checkedout);"]
+
+
+                    

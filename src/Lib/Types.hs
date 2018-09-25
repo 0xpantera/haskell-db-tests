@@ -42,7 +42,7 @@ data User = User
   }
 
 instance Show User where
-  show tool = mconcat [ show $ userId user
+  show user = mconcat [ show $ userId user
                       , ".) "
                       , userName user]           
 
