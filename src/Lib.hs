@@ -22,3 +22,13 @@ addUser userName = withConn "tools.db" $
                         (Only userName)
                       print "user added"
 
+
+checkout :: Int -> Int -> IO ()
+checkout userId toolId = withConn "tools.db" $
+                          \conn -> do
+                            execute conn
+                              "INSERT INTO checkedout (user_id,tool_id) VALUES (?,?)"
+                               (userId,toolId)
+
+
+

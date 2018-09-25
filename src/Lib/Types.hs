@@ -27,6 +27,15 @@ instance Show Tool where
                       , "\n"]
 
 
+
+instance FromRow Tool where
+  fromRow = Tool <$> field
+                 <*> field
+                 <*> field
+                 <*> field
+                 <*> field
+
+
 data User = User
   { userId :: Int
   , userName :: String
@@ -36,3 +45,9 @@ instance Show User where
   show tool = mconcat [ show $ userId user
                       , ".) "
                       , userName user]           
+
+
+instance FromRow User where
+  fromRow = User <$> field
+                 <*> field
+                 
