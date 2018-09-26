@@ -106,3 +106,16 @@ updateToolTable toolId = withConn "tools.db" $
                            let updatedTool = updateTool <$> tool
                                                         <*> pure currentDay
                            updateOrWarn updatedTool
+
+
+checkin :: Int -> IO ()
+checkin toolId = withConn "tools.db" $
+                  \conn -> do
+                    execute conn
+                      "DELETE FROM checkedout WHERE tool_id = (?);"
+                      (Only toolId)
+
+checkinAndUpdate :: Int -> IO ()
+checkinAndUpdate toolId = do
+  checkin toolId
+  updateToolTable toolId
