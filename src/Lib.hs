@@ -1,5 +1,11 @@
 module Lib
-    ( addUser
+    ( printUsers
+    , printTools
+    , promptAndAddUser
+    , promptAndCheckout
+    , promptAndCheckin
+    , printAvailable
+    , printCheckedout
     ) where
 
 import Lib.Types
@@ -119,3 +125,26 @@ checkinAndUpdate :: Int -> IO ()
 checkinAndUpdate toolId = do
   checkin toolId
   updateToolTable toolId
+
+
+promptAndAddUser :: IO ()
+promptAndAddUser = do
+  print "Enter new user name"
+  userName <- getLine
+  addUser userName
+
+
+promptAndCheckout :: IO ()
+promptAndCheckout = do
+  print "Enter the id of the user"
+  userId <- pure read <*> getLine
+  print "Enter the id of the tool"
+  toolId <- pure read <*> getLine
+  checkout userId toolId
+
+
+promptAndCheckin :: IO ()
+promptAndCheckin = do
+  print "Enter the id of the tool"
+  toolId <- pure read <*> getLine
+  checkinAndUpdate toolId
